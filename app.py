@@ -651,9 +651,9 @@ if st.session_state.show_landing:
             System Operational
         </div>
         <div class="nav-links">
-            <a href="#" class="nav-btn">{ICONS['book']} Docs</a>
-            <a href="#" class="nav-btn">{ICONS['layer']} Architecture</a>
-            <a href="#" class="nav-btn">{ICONS['github']} GitHub Repo</a>
+            <a href="D:\AIML Journey\AI Agents\sentinel-ai\agents.md" class="nav-btn">{ICONS['book']} Docs</a>
+            <a href="D:\AIML Journey\AI Agents\sentinel-ai\ARCHITECTURE.md" class="nav-btn">{ICONS['layer']} Architecture</a>
+            <a href="https://github.com/sritamcodes/Sentinel-AI.git" class="nav-btn">{ICONS['github']} GitHub Repo</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -818,6 +818,6 @@ else:
 st.markdown("""
 <div class="footer-terms">
     © 2026 Sentinel AI. Playful. Verified. Secure.<br>
-    <a href="#" style="color: var(--mint); text-decoration: none;">Terms & Conditions</a> • <a href="#" style="color: var(--mint); text-decoration: none;">Privacy Policy</a>
+    <a href="D:\AIML Journey\AI Agents\sentinel-ai\Sentinel_AI_Terms_and_Conditions_Professional.pdf" style="color: var(--mint); text-decoration: none;">Terms & Conditions</a> • <a href=""D:\AIML Journey\AI Agents\sentinel-ai\Sentinel_AI_Privacy_Policy_Professional.pdf"" style="color: var(--mint); text-decoration: none;">Privacy Policy</a>
 </div>
 """, unsafe_allow_html=True)

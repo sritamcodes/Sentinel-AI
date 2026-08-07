@@ -1,5 +1,8 @@
 import streamlit as st
 import time
+import base64
+import os
+import markdown as md_lib
 from core.document_processor import process_uploaded_files, get_text_chunks
 from core.vectorstore import build_vectorstore, get_retriever
 from core.rag_engine import create_sentinel_rag_chain
@@ -555,6 +558,42 @@ if "show_landing" not in st.session_state:
 if "uploaded_file_names" not in st.session_state:
     st.session_state.uploaded_file_names = []
 
+# ─── Helper: Generate base64 data URIs for local files ────────────────────────
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def _pdf_data_uri(filename):
+    """Read a local PDF and return a base64 data URI that opens in a new tab."""
+    filepath = os.path.join(BASE_DIR, filename)
+    if os.path.exists(filepath):
+        with open(filepath, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        return f"data:application/pdf;base64,{b64}"
+    return "#"
+
+def _md_to_html_data_uri(filename, title="Document"):
+    """Read a local .md file, convert to styled HTML, and return a base64 data URI."""
+    filepath = os.path.join(BASE_DIR, filename)
+    if os.path.exists(filepath):
+        with open(filepath, "r", encoding="utf-8") as f:
+            md_content = f.read()
+        html_body = md_lib.markdown(md_content, extensions=["fenced_code", "tables"])
+        full_html = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>{title}</title>
+<style>
+  body {{ font-family: 'Segoe UI', sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: #2C2825; line-height: 1.7; }}
+  h1, h2, h3 {{ color: #1A1817; }} code {{ background: #f0ebe4; padding: 2px 6px; border-radius: 4px; }}
+  pre {{ background: #f0ebe4; padding: 1rem; border-radius: 12px; overflow-x: auto; }}
+</style></head><body>{html_body}</body></html>"""
+        b64 = base64.b64encode(full_html.encode("utf-8")).decode()
+        return f"data:text/html;base64,{b64}"
+    return "#"
+
+# Pre-compute data URIs at startup so they're available for the HTML templates
+DOCS_URI = _md_to_html_data_uri("agents.md", "Sentinel AI — Docs")
+ARCH_URI = _md_to_html_data_uri("ARCHITECTURE.md", "Sentinel AI — Architecture")
+TERMS_URI = _pdf_data_uri("Sentinel_AI_Terms_and_Conditions_Professional.pdf")
+PRIVACY_URI = _pdf_data_uri("Sentinel_AI_Privacy_Policy_Professional.pdf")
+
 def enter_workspace():
     st.session_state.show_landing = False
 
@@ -651,9 +690,9 @@ if st.session_state.show_landing:
             System Operational
         </div>
         <div class="nav-links">
-            <a href="D:\AIML Journey\AI Agents\sentinel-ai\agents.md" class="nav-btn">{ICONS['book']} Docs</a>
-            <a href="D:\AIML Journey\AI Agents\sentinel-ai\ARCHITECTURE.md" class="nav-btn">{ICONS['layer']} Architecture</a>
-            <a href="https://github.com/sritamcodes/Sentinel-AI.git" class="nav-btn">{ICONS['github']} GitHub Repo</a>
+            <a href="{DOCS_URI}" target="_blank" class="nav-btn">{ICONS['book']} Docs</a>
+            <a href="{ARCH_URI}" target="_blank" class="nav-btn">{ICONS['layer']} Architecture</a>
+            <a href="https://github.com/sritamcodes/Sentinel-AI.git" target="_blank" class="nav-btn">{ICONS['github']} GitHub Repo</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -815,9 +854,9 @@ else:
                     """, unsafe_allow_html=True)
 
 # ─── Footer ───────────────────────────────────────────────────────────────────
-st.markdown("""
+st.markdown(f"""
 <div class="footer-terms">
     © 2026 Sentinel AI. Playful. Verified. Secure.<br>
-    <a href="D:\AIML Journey\AI Agents\sentinel-ai\Sentinel_AI_Terms_and_Conditions_Professional.pdf" style="color: var(--mint); text-decoration: none;">Terms & Conditions</a> • <a href=""D:\AIML Journey\AI Agents\sentinel-ai\Sentinel_AI_Privacy_Policy_Professional.pdf"" style="color: var(--mint); text-decoration: none;">Privacy Policy</a>
+    <a href="{TERMS_URI}" target="_blank" style="color: var(--mint); text-decoration: none;">Terms & Conditions</a> • <a href="{PRIVACY_URI}" target="_blank" style="color: var(--mint); text-decoration: none;">Privacy Policy</a>
 </div>
 """, unsafe_allow_html=True)

@@ -7,560 +7,533 @@ from skills.compliance_skill import run_compliance_audit
 
 # ─── Page Configuration ───────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Sentinel AI — Enterprise Intelligence",
+    page_title="Sentinel — Compliance Intelligence",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# ─── Premium CSS Design System ────────────────────────────────────────────────
+# ─── SVG Icons (Lucide) ────────────────────────────────────────────────────────
+ICONS = {
+    "shield": '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>',
+    "file": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>',
+    "search": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+    "user": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    "bot": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cpu"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>',
+    "check": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
+    "zap": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',
+    "layer": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/></svg>',
+    "book": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+    "github": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>'
+}
+
+# ─── Playful Claymorphic + SaaS CSS Design System ─────────────────────────────
 st.markdown("""
 <style>
     /* ═══════════════════════════════════════════════════════════════════════
-       SENTINEL AI — Executive Design System
-       Color: Indigo/Electric Blue on Enterprise Slate
-       Typography: Plus Jakarta Sans + JetBrains Mono
+       SENTINEL AI — Hybrid Design (Asymmetrical SaaS + Playful Claymorphism)
+       Colors: Cream, Soft Apricot, Teal-Mint, Sunny Yellow
+       Typography: DM Sans + IBM Plex Mono
        ═══════════════════════════════════════════════════════════════════════ */
 
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+    :root {
+        --bg-main: #F0EBE4;
+        --bg-card: #F9F7F5;
+        --text-dark: #2C2825;
+        --text-muted: #6b635e;
+        
+        /* Playful Accents */
+        --apricot: #E07A5F;
+        --mint: #81B29A;
+        --yellow: #F4D35E;
+        
+        /* Claymorphism Shadows */
+        --clay-out: 12px 12px 24px rgba(220, 210, 200, 0.4), -12px -12px 24px #FFFFFF;
+        --clay-in: inset 2px 2px 4px rgba(255, 255, 255, 0.8), inset -2px -2px 4px rgba(0,0,0,0.05);
+        
+        /* Softer Shadows for Sidebar */
+        --clay-sidebar-out: 6px 6px 14px rgba(180, 165, 150, 0.35), -6px -6px 14px #FFFFFF;
+        
+        /* Bouncy Animation */
+        --bounce: all 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
 
     /* ── Global Reset ──────────────────────────────────────────────────── */
     html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'DM Sans', -apple-system, sans-serif;
+        color: var(--text-dark);
         -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+        background-color: var(--bg-main) !important;
     }
 
-    .main {
-        background: linear-gradient(165deg, #0f1117 0%, #13151d 35%, #151821 70%, #111320 100%);
+    [data-testid="stAppViewContainer"], [data-testid="stMain"], [data-testid="stHeader"] {
+        background-color: var(--bg-main) !important;
     }
 
     .main .block-container {
-        padding-top: 1.5rem;
+        padding-top: 1rem;
         padding-bottom: 4rem;
-        max-width: 980px;
+        max-width: 1140px;
+    }
+
+    h1, h2, h3, h4, h5, h6, p, div, span {
+        color: var(--text-dark);
+    }
+
+    p {
+        color: var(--text-muted);
     }
 
     /* ── Scrollbar ─────────────────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.5); }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg-main); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
 
-    /* ── Sidebar ───────────────────────────────────────────────────────── */
+    /* ── Sidebar Synchronization ───────────────────────────────────────── */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0d0f14 0%, #111319 50%, #0f1117 100%);
-        border-right: 1px solid rgba(99, 102, 241, 0.1);
+        background: var(--bg-main) !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.03);
     }
 
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-        font-size: 0.875rem;
+    [data-testid="stSidebar"] * {
+        color: var(--text-dark) !important;
     }
 
-    /* ── Header Brand ──────────────────────────────────────────────────── */
-    .sentinel-header {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 0.25rem 0 1rem 0;
-    }
-
-    .sentinel-logo {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #6366f1 0%, #818cf8 50%, #a5b4fc 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.4rem;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3), 0 0 40px rgba(99, 102, 241, 0.1);
-        flex-shrink: 0;
-    }
-
-    .sentinel-header-text {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-
-    .sentinel-header-title {
-        font-size: 1.55rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1.1;
-    }
-
-    .sentinel-header-sub {
-        font-size: 0.78rem;
-        font-weight: 400;
-        color: rgba(148, 163, 184, 0.7);
-        letter-spacing: 0.04em;
-    }
-
-    /* ── Status Badge ──────────────────────────────────────────────────── */
-    .sentinel-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 5px 14px;
+    .sidebar-card {
+        background: var(--bg-card);
         border-radius: 20px;
-        font-size: 10.5px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        background: rgba(99, 102, 241, 0.08);
-        color: #a5b4fc;
-        border: 1px solid rgba(99, 102, 241, 0.18);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-    }
-
-    .status-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        display: inline-block;
-        animation: pulse-glow 2s ease-in-out infinite;
-    }
-
-    .status-dot.active {
-        background-color: #10b981;
-        box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
-    }
-
-    .status-dot.standby {
-        background-color: #f59e0b;
-        box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
-    }
-
-    @keyframes pulse-glow {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.6; transform: scale(0.85); }
-    }
-
-    /* ── Hero Section ──────────────────────────────────────────────────── */
-    .hero-title {
-        font-size: 2.6rem;
-        font-weight: 800;
-        letter-spacing: -0.035em;
-        line-height: 1.1;
-        margin-bottom: 0.25rem;
-        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 40%, #818cf8 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .hero-subtitle {
-        font-size: 1rem;
-        font-weight: 400;
-        color: rgba(148, 163, 184, 0.85);
-        margin-bottom: 1.75rem;
-        line-height: 1.55;
-        max-width: 640px;
-    }
-
-    /* ── Cards & Containers ────────────────────────────────────────────── */
-    .glass-card {
-        padding: 2rem 1.75rem;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .glass-card:hover {
-        border-color: rgba(99, 102, 241, 0.2);
-        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
-    }
-
-    /* ── Empty State ───────────────────────────────────────────────────── */
-    .empty-state-card {
-        padding: 4rem 2.5rem;
+        padding: 1.5rem;
+        box-shadow: var(--clay-sidebar-out);
+        margin-bottom: 1.5rem;
         text-align: center;
-        border: 1px dashed rgba(99, 102, 241, 0.2);
-        border-radius: 20px;
-        margin-top: 1.5rem;
-        background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.03) 0%, transparent 70%);
-        position: relative;
-        overflow: hidden;
+        transition: var(--bounce);
     }
 
-    .empty-state-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.04) 0%, transparent 50%);
-        animation: ambient-rotate 20s linear infinite;
+    /* ── Native Widget Clay Styling ────────────────────────────────────── */
+    .stApp > header {
+        background: transparent !important;
+    }
+    
+    [data-testid="stTextInput"] input {
+        border-radius: 20px !important;
+        background-color: #E8E0D8 !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        box-shadow: inset 3px 3px 6px rgba(180, 165, 150, 0.3), inset -3px -3px 6px #FFFFFF !important;
+        color: var(--text-dark) !important;
+        padding: 0.75rem 1.25rem !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Force readable text inside all input fields and chat boxes */
+    [data-testid="stChatInput"] textarea,
+    [data-testid="stTextInput"] input,
+    div[data-baseweb="textarea"] textarea {
+        color: #1A1817 !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        background-color: #E8E0D8 !important;
+    }
+    /* Style placeholder text so it remains readable */
+    [data-testid="stChatInput"] textarea::placeholder,
+    [data-testid="stTextInput"] input::placeholder {
+        color: #7A7268 !important;
     }
 
-    @keyframes ambient-rotate {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+    /* Target Streamlit file uploader button and drop area */
+    [data-testid="stFileUploader"] section {
+        background-color: #E8E0D8 !important;
+        border-radius: 20px !important;
+        border: 2px dashed rgba(224, 122, 95, 0.4) !important;
+        padding: 16px !important;
+        box-shadow: inset 3px 3px 6px rgba(180, 165, 150, 0.3), inset -3px -3px 6px #FFFFFF !important;
     }
-
-    .empty-state-icon {
-        font-size: 3.5rem;
-        margin-bottom: 1.25rem;
-        display: block;
-        position: relative;
-        z-index: 1;
-        filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.2));
+    [data-testid="stFileUploader"] button {
+        background: #E07A5F !important; /* Soft Apricot accent */
+        color: #FFFFFF !important;
+        border-radius: 16px !important;
+        border: none !important;
+        font-weight: 700 !important;
+        padding: 0.6rem 1.2rem !important;
+        box-shadow: 4px 4px 10px rgba(180, 165, 150, 0.35) !important;
+        transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) !important;
     }
-
-    .empty-state-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: 0.65rem;
-        color: #e2e8f0;
-        position: relative;
-        z-index: 1;
+    [data-testid="stFileUploader"] button:hover {
+        transform: scale(1.04) !important;
+        background: #d0694e !important;
     }
-
-    .empty-state-desc {
-        font-size: 0.875rem;
-        color: rgba(148, 163, 184, 0.75);
-        max-width: 440px;
-        margin: 0 auto;
-        line-height: 1.65;
-        position: relative;
-        z-index: 1;
+    [data-testid="stFileUploader"] button:active {
+        transform: scale(0.96) !important;
     }
-
-    .empty-state-steps {
-        margin-top: 1.75rem;
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-        position: relative;
-        z-index: 1;
-    }
-
-    .step-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 18px;
-        border-radius: 10px;
-        font-size: 0.8rem;
-        font-weight: 500;
-        background: rgba(99, 102, 241, 0.08);
-        border: 1px solid rgba(99, 102, 241, 0.15);
-        color: #a5b4fc;
-        letter-spacing: 0.01em;
-    }
-
-    .step-num {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: rgba(99, 102, 241, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: #818cf8;
-    }
-
-    /* ── Sidebar Branding Card ─────────────────────────────────────────── */
-    .sidebar-brand {
-        padding: 1.25rem;
-        border-radius: 14px;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.02) 100%);
-        border: 1px solid rgba(99, 102, 241, 0.12);
-        margin-bottom: 1.25rem;
-    }
-
-    .sidebar-brand-name {
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: #e2e8f0;
-        margin-bottom: 4px;
-    }
-
-    .sidebar-brand-tagline {
-        font-size: 0.75rem;
-        color: rgba(148, 163, 184, 0.6);
-        font-weight: 400;
-    }
-
-    .sidebar-section-label {
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: rgba(148, 163, 184, 0.45);
-        margin: 1.25rem 0 0.6rem 0;
-    }
-
-    /* ── Model Info Card ───────────────────────────────────────────────── */
-    .model-info {
-        padding: 0.85rem 1rem;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.025);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        margin-top: 0.5rem;
-    }
-
-    .model-info-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px 0;
-        font-size: 0.78rem;
-    }
-
-    .model-info-label {
-        color: rgba(148, 163, 184, 0.55);
-        font-weight: 500;
-    }
-
-    .model-info-value {
-        color: #cbd5e1;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.72rem;
-        font-weight: 500;
-        background: rgba(99, 102, 241, 0.08);
-        padding: 2px 8px;
-        border-radius: 5px;
-    }
-
-    /* ── Button Styling ────────────────────────────────────────────────── */
-    .stButton > button {
-        border-radius: 10px !important;
+    [data-testid="stFileUploader"] span, [data-testid="stFileUploader"] small {
+        color: #2C2825 !important; /* Crisp dark text */
         font-weight: 600 !important;
-        font-size: 0.85rem !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        padding: 0.6rem 1.25rem !important;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        letter-spacing: 0.01em !important;
+    }
+    
+    /* Uploaded file chip background and text color inside st.file_uploader */
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] {
+        background-color: #E8E0D8 !important;
+        border-radius: 18px !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        box-shadow: inset 2px 2px 5px rgba(180, 165, 150, 0.3), inset -2px -2px 5px #FFFFFF !important;
+        padding: 8px 12px !important;
+    }
+    /* Force high-contrast dark text on file name and file size */
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] div,
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] span,
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] small {
+        color: #1A1817 !important;
+        font-weight: 700 !important;
+    }
+
+    /* ── Puffy Bouncy Buttons ──────────────────────────────────────────── */
+    .stButton > button {
+        background: var(--bg-card) !important;
+        border: none !important;
+        border-radius: 40px !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+        padding: 0.8rem 2rem !important;
+        color: var(--text-dark) !important;
+        box-shadow: var(--clay-sidebar-out) !important;
+        transition: var(--bounce) !important;
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-3px) !important;
+    }
+
+    .stButton > button:active {
+        transform: scale(0.96) !important;
+        box-shadow: inset 4px 4px 8px rgba(180, 165, 150, 0.4) !important;
     }
 
     .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%) !important;
-        border: 1px solid rgba(99, 102, 241, 0.3) !important;
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25), 0 0 0 1px rgba(99, 102, 241, 0.1) !important;
-        color: #fff !important;
+        background: var(--apricot) !important;
+        color: #ffffff !important;
+        box-shadow: 6px 6px 14px rgba(224, 122, 95, 0.4), -6px -6px 14px #FFFFFF, inset 2px 2px 6px rgba(255,255,255,0.4), inset -2px -2px 6px rgba(0,0,0,0.1) !important;
     }
-
-    .stButton > button[kind="primary"]:hover {
-        box-shadow: 0 6px 24px rgba(99, 102, 241, 0.35), 0 0 0 1px rgba(99, 102, 241, 0.2) !important;
-        transform: translateY(-1px) !important;
+    .stButton > button[kind="primary"] * {
+        color: #ffffff !important;
     }
-
     .stButton > button[kind="primary"]:active {
-        transform: translateY(0) !important;
+        box-shadow: inset 6px 6px 12px rgba(0,0,0,0.2) !important;
     }
 
-    /* ── Tab Styling ───────────────────────────────────────────────────── */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0;
-        background: rgba(255, 255, 255, 0.02);
-        border-radius: 12px;
-        padding: 4px;
-        border: 1px solid rgba(255, 255, 255, 0.06);
+    /* ── Top Navigation Bar (SaaS Layout) ──────────────────────────────── */
+    .top-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0 2rem;
+        margin-bottom: 2rem;
+    }
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--text-dark);
+    }
+    .nav-brand-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 16px;
+        background: var(--mint);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        box-shadow: var(--clay-out), var(--clay-in);
+    }
+    .nav-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 30px;
+        background: var(--mint);
+        color: #ffffff;
+        font-size: 0.85rem;
+        font-weight: 700;
+        box-shadow: var(--clay-out), var(--clay-in);
+    }
+    .status-dot-nav {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        box-shadow: 0 0 10px rgba(255,255,255,0.8);
+    }
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+    .nav-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 30px;
+        background: var(--mint);
+        color: #ffffff !important;
+        text-decoration: none;
+        transition: var(--bounce);
+        box-shadow: var(--clay-sidebar-out);
+        cursor: pointer;
+    }
+    .nav-btn:hover {
+        transform: translateY(-3px);
+    }
+    .nav-btn:active {
+        transform: scale(0.96);
+    }
+    .nav-btn * {
+        color: #ffffff !important;
     }
 
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.84rem;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        padding: 0.55rem 1.25rem;
-        color: rgba(148, 163, 184, 0.7);
-        transition: all 0.2s ease;
+    /* ── Hero Section (2-Column Left Aligned) ──────────────────────────── */
+    .hero-eyebrow {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        background: var(--yellow);
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--clay-out), var(--clay-in);
+        color: #8c7314;
+    }
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        color: var(--text-dark) !important;
+        text-shadow: none !important;
+    }
+    .hero-body {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        color: var(--text-muted);
+        margin-bottom: 2.5rem;
+        max-width: 90%;
+    }
+    
+    /* ── Right Column Tactile Mockup ───────────────────────────────────── */
+    .mockup-card {
+        background: var(--bg-card);
+        border-radius: 40px;
+        padding: 2.5rem;
+        box-shadow: var(--clay-out), var(--clay-in);
+        max-width: 100%;
+        margin: 0 auto;
+        transform: rotate(2deg);
+        transition: var(--bounce);
+    }
+    .mockup-card:hover {
+        transform: rotate(0deg) translateY(-3px);
+    }
+    .mockup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .mockup-score {
+        background: var(--mint);
+        color: #ffffff;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 800;
+        font-size: 1.2rem;
+        box-shadow: var(--clay-sidebar-out), var(--clay-in);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .mockup-doc {
+        font-family: 'IBM Plex Mono', monospace;
+        background: var(--bg-main);
+        padding: 1rem;
+        border-radius: 20px;
+        box-shadow: inset 4px 4px 8px rgba(180,165,150,0.4), inset -4px -4px 8px #FFFFFF;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--text-muted);
+    }
+
+    /* ── Feature Cards (Left Aligned with Accent) ──────────────────────── */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        margin-bottom: 4rem;
+        margin-top: 4rem;
+    }
+    .clay-feature {
+        background: var(--bg-card);
+        border-radius: 35px;
+        padding: 2.5rem 2rem;
+        box-shadow: var(--clay-out), var(--clay-in);
+        text-align: left;
+        position: relative;
+        overflow: hidden;
+        transition: var(--bounce);
+    }
+    .clay-feature:hover {
+        transform: translateY(-3px);
+    }
+    .clay-feature:active {
+        transform: scale(0.96);
+    }
+    .feature-accent-1 { border-left: 10px solid var(--apricot); }
+    .feature-accent-2 { border-left: 10px solid var(--mint); }
+    .feature-accent-3 { border-left: 10px solid var(--yellow); }
+    
+    .clay-icon-large {
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
+        background: var(--bg-main);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--clay-sidebar-out), var(--clay-in);
+    }
+    .clay-feature h3 {
+        font-size: 1.3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+    .clay-feature p {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    /* ── Tabs (Physical Segmented Controller) ──────────────────────────── */
+    /* Style tab bar container as a pill-shaped clay controller */
+    [data-baseweb="tab-list"] {
+        background-color: #E8E0D8 !important;
+        border-radius: 30px !important;
+        padding: 6px !important;
+        gap: 8px !important;
+        box-shadow: inset 3px 3px 6px rgba(180, 165, 150, 0.35), inset -3px -3px 6px #FFFFFF !important;
+        border: none !important;
+    }
+
+    /* Individual tab buttons */
+    [data-baseweb="tab"] {
+        border-radius: 20px !important;
+        padding: 8px 20px !important;
+        color: #7A7268 !important;
+        font-weight: 700 !important;
+        border: none !important;
+        background-color: transparent !important;
+    }
+
+    /* Active selected tab */
+    [data-baseweb="tab"][aria-selected="true"] {
+        background-color: #F0EBE4 !important;
+        color: #1A1817 !important;
+        box-shadow: 4px 4px 10px rgba(180, 165, 150, 0.3), -4px -4px 10px #FFFFFF !important;
+    }
+
+    /* Hide Streamlit's default active tab red underline */
+    [data-baseweb="tab-highlight-title"], [data-baseweb="tab-border"] {
+        display: none !important;
+    }
+
+    /* ── Chat / Main Workspace ─────────────────────────────────────────── */
+    [data-testid="stChatMessage"] {
+        padding: 1.5rem;
+        border-radius: 30px;
+        margin-bottom: 1.25rem;
+        background: var(--bg-card);
+        box-shadow: var(--clay-sidebar-out);
         border: none;
     }
-
-    .stTabs [data-baseweb="tab"]:hover {
-        color: #e2e8f0;
-        background: rgba(99, 102, 241, 0.06);
+    [data-testid="stChatMessage"]:nth-child(even) {
+        background: var(--bg-main);
+        box-shadow: inset 4px 4px 8px rgba(180, 165, 150, 0.4), inset -4px -4px 8px #FFFFFF;
     }
+    [data-testid="stChatMessage"] * { color: var(--text-dark) !important; }
 
-    .stTabs [aria-selected="true"] {
-        background: rgba(99, 102, 241, 0.12) !important;
-        color: #a5b4fc !important;
-        border: 1px solid rgba(99, 102, 241, 0.2) !important;
-    }
-
-    .stTabs [data-baseweb="tab-highlight"] {
-        display: none;
-    }
-
-    .stTabs [data-baseweb="tab-border"] {
-        display: none;
-    }
-
-    /* ── Chat Messages ─────────────────────────────────────────────────── */
-    [data-testid="stChatMessage"] {
-        padding: 1rem 1.25rem;
-        border-radius: 14px;
-        margin-bottom: 0.75rem;
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        background: rgba(255, 255, 255, 0.015);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        transition: border-color 0.25s ease;
-    }
-
-    [data-testid="stChatMessage"]:hover {
-        border-color: rgba(99, 102, 241, 0.12);
-    }
-
-    /* ── Chat Input ────────────────────────────────────────────────────── */
-    [data-testid="stChatInput"] textarea {
-        border-radius: 12px !important;
-        border: 1px solid rgba(99, 102, 241, 0.15) !important;
-        background: rgba(255, 255, 255, 0.03) !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 0.9rem !important;
-        padding: 0.75rem 1rem !important;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-    }
-
-    [data-testid="stChatInput"] textarea:focus {
-        border-color: rgba(99, 102, 241, 0.4) !important;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
-    }
-
-    /* ── Expander (Source Citations) ────────────────────────────────────── */
     [data-testid="stExpander"] {
-        border: 1px solid rgba(99, 102, 241, 0.12) !important;
-        border-radius: 12px !important;
-        background: rgba(99, 102, 241, 0.03) !important;
-        margin-top: 0.5rem;
+        border: none !important;
+        border-radius: 24px !important;
+        background: var(--bg-main) !important;
+        box-shadow: inset 4px 4px 8px rgba(180, 165, 150, 0.4), inset -4px -4px 8px #FFFFFF !important;
+        margin-top: 1rem;
     }
-
     [data-testid="stExpander"] summary {
-        font-weight: 600;
-        font-size: 0.82rem;
-        color: #a5b4fc;
-        letter-spacing: 0.01em;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text-dark) !important;
     }
 
-    /* ── File Uploader ─────────────────────────────────────────────────── */
-    [data-testid="stFileUploader"] {
-        border-radius: 12px;
+    /* ── Puffy File Chips & Status Cards ───────────────────────────────── */
+    .status-card-puffy {
+        background: var(--bg-card);
+        border-radius: 30px;
+        padding: 2rem;
+        box-shadow: var(--clay-out), var(--clay-in);
+        text-align: center;
+        transition: var(--bounce);
+    }
+    .status-card-puffy:hover {
+        transform: translateY(-3px);
+    }
+    .status-card-puffy:active {
+        transform: scale(0.96);
     }
 
-    [data-testid="stFileUploader"] section {
-        border: 1px dashed rgba(99, 102, 241, 0.2) !important;
-        border-radius: 12px !important;
-        background: rgba(99, 102, 241, 0.03) !important;
-        padding: 1.25rem !important;
-        transition: border-color 0.2s ease, background 0.2s ease;
-    }
-
-    [data-testid="stFileUploader"] section:hover {
-        border-color: rgba(99, 102, 241, 0.35) !important;
-        background: rgba(99, 102, 241, 0.05) !important;
-    }
-
-    /* ── Spinner ────────────────────────────────────────────────────────── */
-    .stSpinner > div {
-        border-top-color: #818cf8 !important;
-    }
-
-    /* ── Success / Warning / Error Alerts ───────────────────────────────── */
-    [data-testid="stAlert"] {
-        border-radius: 10px !important;
-        font-size: 0.84rem !important;
-        border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    }
-
-    /* ── Divider ───────────────────────────────────────────────────────── */
-    [data-testid="stHorizontalBlock"] hr {
-        border-color: rgba(255, 255, 255, 0.06) !important;
-    }
-
-    hr {
-        border-color: rgba(255, 255, 255, 0.06) !important;
-    }
-
-    /* ── Source Citation Card ───────────────────────────────────────────── */
-    .source-card {
-        padding: 0.75rem 1rem;
-        border-radius: 10px;
-        background: rgba(99, 102, 241, 0.04);
-        border: 1px solid rgba(99, 102, 241, 0.1);
-        margin-bottom: 0.65rem;
-        transition: border-color 0.2s ease;
-    }
-
-    .source-card:hover {
-        border-color: rgba(99, 102, 241, 0.25);
-    }
-
-    .source-card-header {
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: #818cf8;
-        margin-bottom: 0.35rem;
-        font-family: 'JetBrains Mono', monospace;
+    .file-chip {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 12px;
+        background: var(--bg-card);
+        padding: 12px 20px;
+        border-radius: 30px;
+        box-shadow: var(--clay-sidebar-out);
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    .file-chip-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--mint);
+        box-shadow: 0 0 8px var(--mint);
     }
 
-    .source-card-content {
-        font-size: 0.8rem;
-        color: rgba(148, 163, 184, 0.8);
-        line-height: 1.5;
-    }
-
-    /* ── Compliance Report Styling ──────────────────────────────────────── */
-    .compliance-report {
-        padding: 1.5rem;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        margin-top: 0.75rem;
-    }
-
-    /* ── Stats Row ─────────────────────────────────────────────────────── */
-    .stats-row {
-        display: flex;
-        gap: 1rem;
-        margin-top: 0.75rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 14px;
-        border-radius: 8px;
-        font-size: 0.76rem;
-        font-weight: 600;
-        background: rgba(99, 102, 241, 0.06);
-        border: 1px solid rgba(99, 102, 241, 0.12);
-        color: #a5b4fc;
-        font-family: 'JetBrains Mono', monospace;
-    }
-
-    .stat-chip .stat-icon {
+    /* ── Footer Terms & Conditions ─────────────────────────────────────── */
+    .footer-terms {
+        text-align: center;
+        padding: 2rem;
         font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 4rem;
+        font-weight: 600;
     }
 
-    /* ── Hide Streamlit Defaults ────────────────────────────────────────── */
+    /* ── Hide Defaults ─────────────────────────────────────────────────── */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
-    header[data-testid="stHeader"] { background: transparent; }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -577,227 +550,274 @@ if "file_count" not in st.session_state:
     st.session_state.file_count = 0
 if "chunk_count" not in st.session_state:
     st.session_state.chunk_count = 0
+if "show_landing" not in st.session_state:
+    st.session_state.show_landing = True
+if "uploaded_file_names" not in st.session_state:
+    st.session_state.uploaded_file_names = []
 
-# ─── Sidebar ──────────────────────────────────────────────────────────────────
-with st.sidebar:
-    # Brand Card
+def enter_workspace():
+    st.session_state.show_landing = False
+
+def go_home():
+    st.session_state.show_landing = True
+
+# ─── Dynamic UI Hiding ────────────────────────────────────────────────────────
+if st.session_state.show_landing:
     st.markdown("""
-    <div class="sidebar-brand">
-        <div class="sidebar-brand-name">🛡️ Sentinel AI</div>
-        <div class="sidebar-brand-tagline">Enterprise Intelligence Platform</div>
-    </div>
+    <style>
+        [data-testid="stSidebar"] { display: none !important; }
+        [data-testid="collapsedControl"] { display: none !important; }
+    </style>
     """, unsafe_allow_html=True)
 
-    # Knowledge Ingestion Section
-    st.markdown('<div class="sidebar-section-label">📁 Knowledge Ingestion</div>', unsafe_allow_html=True)
-    st.caption("Upload policy manuals, audit notes, or compliance documentation.")
-
-    uploaded_files = st.file_uploader(
-        "Upload files",
-        type=["pdf", "docx", "txt"],
-        accept_multiple_files=True,
-        label_visibility="collapsed"
-    )
-
-    st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
-
-    if st.button("⚡ Process & Index Documents", type="primary", use_container_width=True):
-        if uploaded_files:
-            with st.spinner("Embedding documents into vector store..."):
-                raw_docs = process_uploaded_files(uploaded_files)
-                chunks = get_text_chunks(raw_docs)
-                st.session_state.processed_chunks = chunks
-
-                vectorstore = build_vectorstore(chunks)
-                st.session_state.retriever = get_retriever(vectorstore)
-                st.session_state.rag_chain = create_sentinel_rag_chain(st.session_state.retriever)
-
-                st.session_state.file_count = len(uploaded_files)
-                st.session_state.chunk_count = len(chunks)
-
-                st.success(f"✅ Indexed {len(uploaded_files)} file(s) → {len(chunks)} chunks embedded.")
-        else:
-            st.warning("Upload at least one document to proceed.")
-
-    # Index Stats
-    if st.session_state.rag_chain:
-        st.markdown(f"""
-        <div class="stats-row">
-            <div class="stat-chip"><span class="stat-icon">📄</span>{st.session_state.file_count} files</div>
-            <div class="stat-chip"><span class="stat-icon">🧩</span>{st.session_state.chunk_count} chunks</div>
+# ─── Sidebar (Workspace Only) ─────────────────────────────────────────────────
+if not st.session_state.show_landing:
+    with st.sidebar:
+        st.markdown("<div style='margin-bottom: 1.5rem;'>", unsafe_allow_html=True)
+        if st.button("← Back to Landing Page", use_container_width=True, on_click=go_home):
+            pass
+        st.markdown("</div>", unsafe_allow_html=True)
+            
+        # Clean horizontal brand row
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 12px; padding: 8px 4px 20px 4px;">
+            <div style="width: 38px; height: 38px; border-radius: 12px; background: #E07A5F; display: flex; align-items: center; justify-content: center; box-shadow: 3px 3px 8px rgba(180,165,150,0.4);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+                <div style="font-size: 1.15rem; font-weight: 800; color: #1A1817; line-height: 1.1;">Sentinel AI</div>
+                <div style="font-size: 0.75rem; font-weight: 600; color: #7A7268; letter-spacing: 0.05em; margin-top: 2px;">WORKSPACE</div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        uploaded_files = st.file_uploader(
+            "Upload enterprise documents",
+            type=["pdf", "docx", "txt"],
+            accept_multiple_files=True,
+            label_visibility="collapsed"
+        )
 
-    st.divider()
+        st.markdown("<div style='margin-top: 1.5rem;'>", unsafe_allow_html=True)
+        if st.button("Process Documents", type="primary", use_container_width=True):
+            if uploaded_files:
+                with st.spinner("Indexing documents..."):
+                    raw_docs = process_uploaded_files(uploaded_files)
+                    chunks = get_text_chunks(raw_docs)
+                    
+                    if not chunks:
+                        st.error("Could not extract readable text from the uploaded PDF/document. Please upload a valid document with selectable text.")
+                    else:
+                        st.session_state.processed_chunks = chunks
 
-    # Model Details Card
-    st.markdown('<div class="sidebar-section-label">🤖 Model Configuration</div>', unsafe_allow_html=True)
-    st.markdown("""
-    <div class="model-info">
-        <div class="model-info-row">
-            <span class="model-info-label">LLM</span>
-            <span class="model-info-value">llama-3.3-70b</span>
+                        vectorstore = build_vectorstore(chunks)
+                        st.session_state.retriever = get_retriever(vectorstore)
+                        st.session_state.rag_chain = create_sentinel_rag_chain(st.session_state.retriever)
+
+                        st.session_state.file_count = len(uploaded_files)
+                        st.session_state.chunk_count = len(chunks)
+                        st.session_state.uploaded_file_names = [f.name for f in uploaded_files]
+                        
+                        st.success("Indexing complete.")
+                        time.sleep(0.5)
+                        st.rerun()
+            else:
+                st.warning("Please upload a document first.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        if st.session_state.file_count > 0:
+            st.markdown(f"""
+            <div style="margin-top: 2rem; font-weight: 800; margin-bottom: 1rem; font-size: 1.1rem; text-align: center;">Active Documents</div>
+            """, unsafe_allow_html=True)
+            for fname in st.session_state.uploaded_file_names:
+                st.markdown(f"""
+                <div class="file-chip">
+                    <div class="file-chip-dot"></div>
+                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">{fname}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+# ─── Landing Page View ────────────────────────────────────────────────────────
+if st.session_state.show_landing:
+    # Top Navigation Bar
+    st.markdown(f"""
+    <div class="top-nav">
+        <div class="nav-brand">
+            <div class="nav-brand-icon">{ICONS['shield']}</div>
+            Sentinel AI
         </div>
-        <div class="model-info-row">
-            <span class="model-info-label">Embeddings</span>
-            <span class="model-info-value">bge-small-en-v1.5</span>
+        <div class="nav-status">
+            <div class="status-dot-nav"></div>
+            System Operational
         </div>
-        <div class="model-info-row">
-            <span class="model-info-label">Vector DB</span>
-            <span class="model-info-value">ChromaDB (MMR)</span>
-        </div>
-        <div class="model-info-row">
-            <span class="model-info-label">Provider</span>
-            <span class="model-info-value">Groq Cloud</span>
+        <div class="nav-links">
+            <a href="#" class="nav-btn">{ICONS['book']} Docs</a>
+            <a href="#" class="nav-btn">{ICONS['layer']} Architecture</a>
+            <a href="#" class="nav-btn">{ICONS['github']} GitHub Repo</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("<div style='height: 0.75rem;'></div>", unsafe_allow_html=True)
-
-    st.markdown('<div class="sidebar-section-label">ℹ️ About</div>', unsafe_allow_html=True)
-    st.caption("Sentinel AI is a grounded enterprise Q&A and automated compliance risk engine. All responses are citation-backed from your uploaded documents.")
-
-
-# ─── Main Canvas ──────────────────────────────────────────────────────────────
-
-# Header with status badge
-is_active = st.session_state.rag_chain is not None
-status_class = "active" if is_active else "standby"
-status_label = "Engine Active" if is_active else "Awaiting Documents"
-
-st.markdown(f"""
-<div class="sentinel-header">
-    <div class="sentinel-logo">🛡️</div>
-    <div class="sentinel-header-text">
-        <div class="sentinel-header-title">Sentinel AI</div>
-        <div class="sentinel-header-sub">Enterprise Intelligence & Compliance Engine</div>
+    
+    # Asymmetrical 2-Column Hero
+    col1, col2 = st.columns([1.2, 1], gap="large")
+    
+    with col1:
+        st.markdown("""
+        <div style="padding-top: 2rem;">
+            <div class="hero-eyebrow">Enterprise Compliance Intelligence</div>
+            <h1 class="hero-title">Automated Policy Verification & Citation Auditing</h1>
+            <p class="hero-body">Transform static compliance manuals into verifiable intelligence. Run line-by-line risk audits and grounded Q&A with zero hallucination guarantee.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        btn_col1, btn_col2 = st.columns([1, 1.5])
+        with btn_col1:
+            if st.button("Enter Workspace →", type="primary", use_container_width=True, on_click=enter_workspace):
+                pass
+            
+    with col2:
+        st.markdown(f"""
+        <div class="mockup-card">
+            <div class="mockup-header">
+                <div style="font-weight: 800; font-size: 1.2rem;">Audit Report</div>
+                <div class="mockup-score">
+                    <div style="width: 20px; height: 20px;">{ICONS['check']}</div> 98% Compliant
+                </div>
+            </div>
+            <div style="font-weight: 700; margin-bottom: 0.5rem; color: var(--text-dark);">Verified Source Citation:</div>
+            <div class="mockup-doc">
+                "All external vendors must undergo a tier-1 security review before receiving access to production databases. Refer to section 4.2.1."<br><br>
+                <span style="color: var(--mint); font-weight: 800;">[Source: Vendor_Policy_2024.pdf, Page 12]</span>
+            </div>
+            <div style="margin-top: 1.5rem; display: flex; gap: 10px;">
+                <div style="height: 12px; width: 60%; background: var(--apricot); border-radius: 10px;"></div>
+                <div style="height: 12px; width: 30%; background: var(--mint); border-radius: 10px;"></div>
+            </div>
+            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                <div style="height: 12px; width: 40%; background: var(--bg-main); border-radius: 10px;"></div>
+                <div style="height: 12px; width: 50%; background: var(--yellow); border-radius: 10px;"></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Feature Cards Showcase
+    st.markdown(f"""
+    <div class="features-grid">
+        <div class="clay-feature feature-accent-1">
+            <div class="clay-icon-large">{ICONS['book']}</div>
+            <h3>Grounded RAG</h3>
+            <p>Synthesizes answers directly from uploaded policy manuals with zero hallucination guarantee.</p>
+        </div>
+        <div class="clay-feature feature-accent-2">
+            <div class="clay-icon-large">{ICONS['search']}</div>
+            <h3>Compliance Risk Audit</h3>
+            <p>Automatically flags non-compliant clauses and identifies operational policy gaps.</p>
+        </div>
+        <div class="clay-feature feature-accent-3">
+            <div class="clay-icon-large">{ICONS['check']}</div>
+            <h3>Citation Tracing</h3>
+            <p>Every output includes verifiable source citations pointing directly to exact document sections.</p>
+        </div>
     </div>
-</div>
-<div class="sentinel-badge">
-    <span class="status-dot {status_class}"></span>
-    {status_label}
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+    
+# ─── Main Workspace View ──────────────────────────────────────────────────────
+else:
+    is_active = st.session_state.rag_chain is not None
+    
+    if not is_active:
+        st.markdown("""
+        <div style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 1.2rem; font-weight: 700; color: #1A1817;">Workspace Ready</div>
+            <p style="color: #7A7268; margin-top: 6px;">Upload a PDF document in the sidebar to begin running compliance audits.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        tab_chat, tab_audit = st.tabs(["Document Q&A", "Risk Audit"])
 
-st.markdown('<p class="hero-subtitle">Grounded document Q&A with citation verification and automated compliance risk auditing — powered by RAG.</p>', unsafe_allow_html=True)
+        # ── Tab 1: Intelligence Chat ──────────────────────────────────────────
+        with tab_chat:
+            st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
 
-
-# ─── Active State: Tabs ──────────────────────────────────────────────────────
-if st.session_state.rag_chain:
-    tab_chat, tab_audit = st.tabs(["💬 Intelligence Chat", "🛡️ Compliance Audit"])
-
-    # ── Tab 1: Intelligence Chat ──────────────────────────────────────────
-    with tab_chat:
-        st.markdown("<div style='height: 0.75rem;'></div>", unsafe_allow_html=True)
-
-        # Render chat history
-        for msg in st.session_state.chat_history:
-            avatar = "🛡️" if msg["role"] == "assistant" else "👤"
-            with st.chat_message(msg["role"], avatar=avatar):
-                st.markdown(msg["content"])
-                # Re-render sources for assistant messages
-                if msg["role"] == "assistant" and "sources" in msg:
-                    with st.expander("📍 Source Citations & Grounding Passages"):
-                        for src in msg["sources"]:
-                            st.markdown(f"""
-                            <div class="source-card">
-                                <div class="source-card-header">
-                                    📄 Source [{src['idx']}]: {src['file']} &nbsp;|&nbsp; Page {src['page']}
-                                </div>
-                                <div class="source-card-content">{src['content'][:300]}{'...' if len(src['content']) > 300 else ''}</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-
-        # Chat input
-        if user_query := st.chat_input("Ask about your enterprise documents..."):
-            st.session_state.chat_history.append({"role": "user", "content": user_query})
-            with st.chat_message("user", avatar="👤"):
-                st.markdown(user_query)
-
-            with st.chat_message("assistant", avatar="🛡️"):
-                with st.spinner("Searching knowledge base..."):
-                    response = st.session_state.rag_chain.invoke(user_query)
-                    st.markdown(response)
-
-                    # Source citations
-                    sources = []
-                    if st.session_state.retriever:
-                        retrieved_docs = st.session_state.retriever.invoke(user_query)
-                        with st.expander("📍 Source Citations & Grounding Passages"):
-                            for idx, doc in enumerate(retrieved_docs, start=1):
-                                src_file = doc.metadata.get("source", "Unknown")
-                                src_page = doc.metadata.get("page", "N/A")
-                                content = doc.page_content
-                                sources.append({"idx": idx, "file": src_file, "page": src_page, "content": content})
+            for msg in st.session_state.chat_history:
+                # Using generic string for avatar inside st.chat_message since Streamlit doesn't render SVG properly in the avatar parameter
+                with st.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
+                    if msg["role"] == "assistant" and "sources" in msg:
+                        with st.expander("View Source Citations"):
+                            for src in msg["sources"]:
                                 st.markdown(f"""
-                                <div class="source-card">
-                                    <div class="source-card-header">
-                                        📄 Source [{idx}]: {src_file} &nbsp;|&nbsp; Page {src_page}
+                                <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 20px; box-shadow: var(--clay-sidebar-out); margin-bottom: 1rem;">
+                                    <div style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: var(--apricot); margin-bottom: 0.5rem;">
+                                        Source [{src['idx']}] • {src['file']} (Page {src['page']})
                                     </div>
-                                    <div class="source-card-content">{content[:300]}{'...' if len(content) > 300 else ''}</div>
+                                    <div style="line-height: 1.6;">{src['content'][:400]}{'...' if len(src['content']) > 400 else ''}</div>
                                 </div>
                                 """, unsafe_allow_html=True)
 
-            st.session_state.chat_history.append({
-                "role": "assistant",
-                "content": response,
-                "sources": sources
-            })
+            if user_query := st.chat_input("Query your document index..."):
+                st.session_state.chat_history.append({"role": "user", "content": user_query})
+                with st.chat_message("user"):
+                    st.markdown(user_query)
 
-    # ── Tab 2: Compliance Audit ───────────────────────────────────────────
-    with tab_audit:
-        st.markdown("<div style='height: 0.75rem;'></div>", unsafe_allow_html=True)
+                with st.chat_message("assistant"):
+                    with st.spinner("Analyzing index..."):
+                        response = st.session_state.rag_chain.invoke(user_query)
+                        st.markdown(response)
 
-        # Audit header card
-        st.markdown("""
-        <div class="glass-card">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.75rem;">
-                <span style="font-size: 1.75rem;">🔍</span>
+                        sources = []
+                        if st.session_state.retriever:
+                            retrieved_docs = st.session_state.retriever.invoke(user_query)
+                            with st.expander("View Source Citations"):
+                                for idx, doc in enumerate(retrieved_docs, start=1):
+                                    src_file = doc.metadata.get("source", "Unknown")
+                                    src_page = doc.metadata.get("page", "N/A")
+                                    content = doc.page_content
+                                    sources.append({"idx": idx, "file": src_file, "page": src_page, "content": content})
+                                    st.markdown(f"""
+                                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 20px; box-shadow: var(--clay-sidebar-out); margin-bottom: 1rem;">
+                                        <div style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: var(--apricot); margin-bottom: 0.5rem;">
+                                            Source [{idx}] • {src_file} (Page {src_page})
+                                        </div>
+                                        <div style="line-height: 1.6;">{content[:400]}{'...' if len(content) > 400 else ''}</div>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+
+                st.session_state.chat_history.append({
+                    "role": "assistant",
+                    "content": response,
+                    "sources": sources
+                })
+
+        # ── Tab 2: Compliance Audit ───────────────────────────────────────────
+        with tab_audit:
+            st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
+
+            st.markdown(f"""
+            <div style="background: var(--bg-card); padding: 2.5rem; border-radius: 35px; box-shadow: var(--clay-out), var(--clay-in); display: flex; gap: 2rem; align-items: center; margin-bottom: 2rem; border-left: 10px solid var(--mint);">
+                <div style="width: 80px; height: 80px; border-radius: 24px; background: var(--bg-main); display: flex; align-items: center; justify-content: center; color: var(--text-dark); flex-shrink: 0; box-shadow: var(--clay-sidebar-out), var(--clay-in);">
+                    {ICONS['search']}
+                </div>
                 <div>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: #e2e8f0;">Automated Compliance & Risk Audit</div>
-                    <div style="font-size: 0.8rem; color: rgba(148,163,184,0.65); margin-top: 2px;">
-                        Executes an autonomous AI evaluation across all indexed document chunks for risk and policy analysis.
+                    <h2 style="margin-bottom: 0.5rem; font-weight: 800;">Automated Risk Audit</h2>
+                    <p style="font-size: 1.1rem;">Execute an autonomous evaluation across all indexed documents to identify policy gaps and risk vectors.</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if st.button("Run Full Audit", type="primary", use_container_width=True):
+                with st.spinner("Evaluating compliance guidelines..."):
+                    report = run_compliance_audit(st.session_state.processed_chunks)
+                    st.markdown(f"""
+                    <div style="background: var(--bg-card); padding: 2.5rem; border-radius: 35px; box-shadow: var(--clay-out), var(--clay-in); margin-top: 1.5rem;">
+                        {report}
                     </div>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
 
-        st.markdown("<div style='height: 0.75rem;'></div>", unsafe_allow_html=True)
-
-        if st.button("🛡️ Run Compliance Audit", type="primary", use_container_width=True, key="audit_btn"):
-            with st.spinner("Evaluating compliance guidelines and risk vectors..."):
-                report = run_compliance_audit(st.session_state.processed_chunks)
-                st.markdown(f"""
-                <div class="compliance-report">
-                    {report}
-                </div>
-                """, unsafe_allow_html=True)
-                st.markdown(report)
-
-# ─── Inactive State: Empty Hero ──────────────────────────────────────────────
-else:
-    st.markdown("""
-    <div class="empty-state-card">
-        <span class="empty-state-icon">🛡️</span>
-        <div class="empty-state-title">Sentinel Workspace Inactive</div>
-        <div class="empty-state-desc">
-            Upload your enterprise PDFs, Word documents, or policy files to activate the intelligence engine. All queries will be grounded against your documents with full citation tracing.
-        </div>
-        <div class="empty-state-steps">
-            <div class="step-pill">
-                <div class="step-num">1</div>
-                Upload documents
-            </div>
-            <div class="step-pill">
-                <div class="step-num">2</div>
-                Process & Index
-            </div>
-            <div class="step-pill">
-                <div class="step-num">3</div>
-                Query & Audit
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+# ─── Footer ───────────────────────────────────────────────────────────────────
+st.markdown("""
+<div class="footer-terms">
+    © 2026 Sentinel AI. Playful. Verified. Secure.<br>
+    <a href="#" style="color: var(--mint); text-decoration: none;">Terms & Conditions</a> • <a href="#" style="color: var(--mint); text-decoration: none;">Privacy Policy</a>
+</div>
+""", unsafe_allow_html=True)

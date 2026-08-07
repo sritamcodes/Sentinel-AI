@@ -19,6 +19,28 @@ def get_embedding_function():
     )
 
 def build_vectorstore(documents: List[Document]) -> Chroma:
+    # 1. Ensure chunks is not empty
+    if not documents:
+        raise ValueError("No text chunks were provided to build the vectorstore.")
+
+    # 2. Extract string content and filter out empty/None values
+    clean_documents = []
+    for chunk in documents:
+        if isinstance(chunk, Document):
+            text = chunk.page_content
+            metadata = chunk.metadata
+        elif isinstance(chunk, str):
+            text = chunk
+            metadata = {}
+        else:
+            continue
+            
+        if text and isinstance(text, str) and text.strip():
+            clean_documents.append(Document(page_content=text.strip(), metadata=metadata))
+    
+    if not clean_documents:
+        raise ValueError("All extracted text chunks were empty or invalid.")
+
     if os.path.exists(config.CHROMA_PERSIST_DIR):
         try:
             shutil.rmtree(config.CHROMA_PERSIST_DIR)
@@ -27,8 +49,9 @@ def build_vectorstore(documents: List[Document]) -> Chroma:
 
     embeddings = get_embedding_function()
     
+    # 3. Build Chroma Vectorstore safely
     vectorstore = Chroma.from_documents(
-        documents=documents,
+        documents=clean_documents,
         embedding=embeddings,
         collection_name=config.COLLECTION_NAME,
         persist_directory=config.CHROMA_PERSIST_DIR

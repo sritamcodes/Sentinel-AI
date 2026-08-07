@@ -1,24 +1,35 @@
-# Sentinel AI 🛡️
+# 🛡️ Sentinel AI — Compliance & Document Intelligence Workspace
 
-[![CI Pipeline](https://github.com/sritamcodes/Sentinel-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/sritamcodes/Sentinel-AI/actions)
-[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-31011/)
-[![Streamlit](https://img.shields.io/badge/frontend-Streamlit-FF4B4B.svg)](https://streamlit.io/)
-[![ChromaDB](https://img.shields.io/badge/vectorstore-ChromaDB-orange.svg)](https://www.trychroma.com/)
-[![Groq API](https://img.shields.io/badge/LLM-Groq%20(Llama%203.3%2070B)-violet.svg)](https://groq.com/)
-
-An intelligent agentic system for automated document compliance, policy verification, and structured risk analysis using Retrieval-Augmented Generation (RAG).
+Sentinel AI is a modern, privacy-focused Document Intelligence & Compliance Engine built with a custom **Claymorphic UI**. Powered by Retrieval-Augmented Generation (RAG), local vector embeddings via ChromaDB, and LangChain, Sentinel AI enables teams to ingest enterprise PDFs, audit risk factors, map structural citations, and perform Q&A without leaking sensitive data to external API dependencies.
 
 ---
 
-## 🚀 Key Features
+## ✨ Features
 
-- **Document Analysis Engine:** Ingests and processes complex policy and compliance documents.
-- **RAG Architecture:** Leverages ChromaDB for vector similarity search paired with local HuggingFace embeddings (`BAAI/bge-small-en-v1.5`).
-- **Groq LLM Acceleration:** High-speed inference using `llama-3.3-70b-versatile`.
-- **Modular Agent Skills:** Extensible skill architecture designed for rule enforcement and audit reporting.
-- **Automated CI/CD:** Fully verified via GitHub Actions and Pytest test suites.
+* **🎨 Soft Claymorphic Interface:** Handcrafted, accessible UI built with customized Streamlit components, tactile 3D cards, and clean SVG vector icons.
+* **🔒 Privacy-First RAG Pipeline:** Leverages local `sentence-transformers/all-MiniLM-L6-v2` embeddings via Hugging Face—no external API key required by default.
+* **📄 Document Ingestion & Chunking:** Multi-page PDF parsing via `pypdf` with strict data cleaning and token-safe chunking to eliminate vectorization errors.
+* **🎯 Citation Mapping & Risk Auditing:** Automatically maps source chunks back to exact document references for transparent compliance verification.
+* **💬 Dynamic Segmented Workspace:** Clean, pill-shaped tab navigation separating **Document Q&A** and **Risk Audit** views.
+* **🔑 Optional HF Token Integration:** Expand functionality seamlessly to gated models or inference endpoints through an in-app advanced settings toggle.
 
 ---
+
+## 🛠️ Tech Stack
+
+* **Frontend Framework:** [Streamlit](https://streamlit.io/) with custom CSS overrides & HTML5 SVGs
+* **Vector Database:** [ChromaDB](https://www.trychroma.com/)
+* **LLM & RAG Orchestration:** [LangChain](https://www.langchain.com/) / [LangChain-HuggingFace](https://python.langchain.com/)
+* **Document Parser:** [PyPDF](https://pypdf.readthedocs.io/)
+* **Embeddings:** `sentence-transformers/all-MiniLM-L6-v2` (Local execution)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+* Python 3.10 or higher
+* Git
 
 ## 📐 Architecture Overview
 ```

@@ -2,7 +2,13 @@ import streamlit as st
 import time
 import base64
 import os
+from dotenv import load_dotenv
 import markdown as md_lib
+
+# Load environment variables
+load_dotenv()
+# Explicitly fetch Groq API key
+groq_api_key = os.getenv("GROQ_API_KEY")
 from core.document_processor import process_uploaded_files, get_text_chunks
 from core.vectorstore import build_vectorstore, get_retriever
 from core.rag_engine import create_sentinel_rag_chain
@@ -640,8 +646,9 @@ if not st.session_state.show_landing:
         st.markdown("<div style='margin-top: 1.5rem;'>", unsafe_allow_html=True)
         if st.button("Process Documents", type="primary", use_container_width=True):
             if uploaded_files:
+                progress = st.progress(0)
                 with st.spinner("Indexing documents..."):
-                    raw_docs = process_uploaded_files(uploaded_files)
+                    raw_docs = process_uploaded_files(uploaded_files, progress=progress)
                     chunks = get_text_chunks(raw_docs)
                     
                     if not chunks:
